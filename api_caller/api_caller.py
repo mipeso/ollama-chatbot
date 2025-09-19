@@ -1,7 +1,19 @@
 import ollama
+import logging
+import os
+import re
 
-MODEL = "deepseek-r1:7b"
+MODEL = "deepseek-r1:1.5b"
 ROLE = "user"
+
+logging.basicConfig(
+    filename=os.path.join(os.path.abspath(__package__), "app.log"),
+    encoding="utf-8",
+    level=logging.INFO,
+    format="%(message)s",
+)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+LOGGER = logging.getLogger(__name__)
 
 
 class APICaller:
@@ -21,3 +33,11 @@ class APICaller:
             messages=[message],
         )
         return response
+
+    def save_response(self, answer: str, question: str) -> None:
+        print(f"Question: {question}")
+        print("Response:")
+        print(answer)
+        answer_cleaned = re.sub(r"<.*?>", "", answer).strip()
+        LOGGER.info(f"Question: {question}")
+        LOGGER.info(f"Answer: {answer_cleaned}")

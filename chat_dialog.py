@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QVBoxLayout,
 )
+import os
 import sys
 from api_caller.api_caller import APICaller
 
@@ -30,9 +31,15 @@ class ChatDialog(QDialog):
         self.ok_button.clicked.connect(self.send_content)
 
     def send_content(self):
-        content = self.content.text()
+        question = self.content.text()
+        file_path = os.path.join(os.getcwd(), "api_caller", "app.log")
+        with open(file_path, "r") as f:
+            logs = f.read()
+        content = logs + f"Question: {question}"
         response = self.api_caller.get_response(content)
-        self.response_field.setText(response["message"]["content"])
+        answer = response["message"]["content"]
+        self.api_caller.save_response(answer, question)
+        self.response_field.setText(answer)
 
 
 app = QApplication(sys.argv)
