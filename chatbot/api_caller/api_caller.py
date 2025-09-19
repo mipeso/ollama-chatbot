@@ -1,13 +1,14 @@
-import ollama
 import logging
 import os
 import re
+
+import ollama
 
 MODEL = "deepseek-r1:1.5b"
 ROLE = "user"
 
 logging.basicConfig(
-    filename=os.path.join(os.path.abspath(__package__), "app.log"),
+    filename=os.path.join(os.path.dirname(__file__), "app.log"),
     encoding="utf-8",
     level=logging.INFO,
     format="%(message)s",
