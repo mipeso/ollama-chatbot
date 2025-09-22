@@ -1,20 +1,17 @@
+import json
 import logging
-import os
 import re
+from pathlib import Path
 
 import ollama
 
 MODEL = "deepseek-r1:1.5b"
 ROLE = "user"
 
-logging.basicConfig(
-    filename=os.path.join(os.path.dirname(__file__), "app.log"),
-    encoding="utf-8",
-    level=logging.INFO,
-    format="%(message)s",
-)
+
 logging.getLogger("httpx").setLevel(logging.WARNING)
 LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 
 class APICaller:
@@ -35,10 +32,18 @@ class APICaller:
         )
         return response
 
-    def save_response(self, answer: str, question: str) -> None:
-        print(f"Question: {question}")
-        print("Response:")
-        print(answer)
-        answer_cleaned = re.sub(r"<.*?>", "", answer).strip()
-        LOGGER.info(f"Question: {question}")
-        LOGGER.info(f"Answer: {answer_cleaned}")
+    def save_response(self, answer: str, question: str, log_file: Path) -> None:
+        print(log_file)
+        handler = logging.FileHandler(log_file, encoding="utf-8")
+        handler.setFormatter(logging.Formatter("%(message)s"))
+        LOGGER.addHandler(handler)
+        try:
+            answer_cleaned = re.sub(r"<.*?>", "", answer).strip()
+            print(f"Question: {question}")
+            print("Response:")
+            print(answer_cleaned)
+            entry = {"Q": question, "A": answer_cleaned}
+            LOGGER.info(json.dumps(entry, ensure_ascii=False))
+        finally:
+            LOGGER.removeHandler(handler)
+            handler.close()
