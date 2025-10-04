@@ -46,13 +46,38 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>40</y>
-      <width>171</width>
-      <height>511</height>
+      <x>190</x>
+      <y>520</y>
+      <width>611</width>
+      <height>33</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="vertical_layout">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLineEdit" name="text_box"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="send_button">
+       <property name="text">
+        <string>Send</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>0</y>
+      <width>171</width>
+      <height>551</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QComboBox" name="model_combobox"/>
+     </item>
      <item>
       <widget class="QListWidget" name="chat_list"/>
      </item>
@@ -73,28 +98,6 @@
         </widget>
        </item>
       </layout>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QWidget" name="">
-    <property name="geometry">
-     <rect>
-      <x>190</x>
-      <y>520</y>
-      <width>611</width>
-      <height>33</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QLineEdit" name="text_box"/>
-     </item>
-     <item>
-      <widget class="QPushButton" name="send_button">
-       <property name="text">
-        <string>Send</string>
-       </property>
-      </widget>
      </item>
     </layout>
    </widget>
