@@ -4,10 +4,12 @@ import sys
 from enum import Enum
 from pathlib import Path
 
+import ollama
 from PyQt6 import uic
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QApplication,
+    QComboBox,
     QInputDialog,
     QLabel,
     QLineEdit,
@@ -46,32 +48,46 @@ class MainWindow(QMainWindow, FormClass):  # type: ignore
         self.vertical_layout: QVBoxLayout
         self.text_box: QLineEdit
         self.send_button: QPushButton
+        self.model_combobox: QComboBox
 
         self.scroll_widget = QWidget()
         self.scroll_layout = QVBoxLayout(self.scroll_widget)
         self.scroll_area.setWidget(self.scroll_widget)
 
-        self.api_caller = APICaller()
-        self.data = []
-
         self.chat_list.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
 
-        # Fetch old chats
-        logs = get_logs()
-        if logs:
-            for log in logs:
-                self.chat_list.addItem(log.stem)
+        # List for holding inputs to model
+        self.data = []
+
+        # Populate model combobox
+        self.populate_model_list()
+        self.init_model()
+        self.model_combobox.currentTextChanged.connect(self.init_model)
 
         self.add_button.clicked.connect(self.add_chat)
         self.delete_button.clicked.connect(self.delete_chat)
         self.chat_list.currentItemChanged.connect(self.load_chat)
         self.send_button.clicked.connect(self.send_content)
 
+    def populate_model_list(self) -> None:
+        models = ollama.list()
+        for model in models["models"]:
+            self.model_combobox.addItem(model["model"])
+        self.api_caller = APICaller(self.model_combobox.currentText())
+
+    def init_model(self) -> None:
+        self.api_caller = APICaller(self.model_combobox.currentText())
+        self.chat_list.clear()
+        logs = get_logs(self.model_combobox.currentText())
+        if logs:
+            for log in logs:
+                self.chat_list.addItem(log.stem)
+
     def add_chat(self) -> None:
         text, ok = QInputDialog.getText(None, "New Chat", "Enter chat name:")
         if ok and text:
             self.chat_list.addItem(text)
-            init_log(text)
+            init_log(text, self.model_combobox.currentText())
             new_item = self.chat_list.item(self.chat_list.count() - 1)
             self.chat_list.setCurrentItem(new_item)
 
@@ -79,7 +95,7 @@ class MainWindow(QMainWindow, FormClass):  # type: ignore
         for item in self.chat_list.selectedItems():
             row = self.chat_list.row(item)
             self.chat_list.takeItem(row)
-            delete_log(item.text())
+            delete_log(item.text(), self.model_combobox.currentText())
 
     def clear_layout(self, layout: QVBoxLayout):
         while layout.count():
@@ -99,6 +115,7 @@ class MainWindow(QMainWindow, FormClass):  # type: ignore
             Path(__file__).parent.parent
             / "api_caller"
             / "logs"
+            / self.model_combobox.currentText()
             / f"{current_item.text()}.log"
         )
         self.clear_layout(self.scroll_layout)
@@ -127,6 +144,7 @@ class MainWindow(QMainWindow, FormClass):  # type: ignore
             Path(__file__).parent.parent
             / "api_caller"
             / "logs"
+            / self.model_combobox.currentText()
             / f"{self.chat_list.currentItem().text()}.log"
         )
 
@@ -135,7 +153,6 @@ class MainWindow(QMainWindow, FormClass):  # type: ignore
 
         response = self.api_caller.get_response(messages)
         answer = response["message"]["content"]
-        print(answer)
         answer_cleaned = re.sub(r"<.*?>", "", answer).strip()
 
         self.data.append({"role": ROLES.user, "content": question})
