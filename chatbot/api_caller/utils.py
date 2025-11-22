@@ -7,7 +7,7 @@ def init_log(name: str, model: str, extension: str = "log") -> None:
     model_dir = Path(log_folder, model)
     if not model_dir.exists():
         model_dir.mkdir(parents=True, exist_ok=True)
-        Path(model_dir / f"{name}.{extension}").touch()
+    Path(model_dir / f"{name}.{extension}").touch()
 
 
 def delete_log(name: str, model: str, extension: str = "log") -> None:
