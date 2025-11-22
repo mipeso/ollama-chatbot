@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
             self.chat_list.takeItem(row)
             delete_log(item.text(), self.model_combobox.currentText())
 
-    def clear_layout(self, layout: QVBoxLayout):
+    def clear_layout(self, layout: QVBoxLayout) -> None:
         while layout.count():
             item = layout.takeAt(0)
             widget = item.widget()
@@ -160,11 +160,11 @@ class MainWindow(QMainWindow):
 
         if message_type == MessageType.QUESTION:
             msg_label.setStyleSheet(
-                "background-color: lightblue; border-radius: 10px; padding: 2px; margin: 4px;"
+                "color: black; background-color: lightblue; border-radius: 10px; padding: 2px; margin: 4px;"
             )
         elif message_type == MessageType.ANSWER:
             msg_label.setStyleSheet(
-                "background-color: lightgreen; border-radius: 10px; padding: 2px; margin: 4px;"
+                "color: black; background-color: lightgreen; border-radius: 10px; padding: 2px; margin: 4px;"
             )
         self.scroll_layout.addWidget(msg_label)
         self.text_box.clear()
