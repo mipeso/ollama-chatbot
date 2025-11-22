@@ -2,7 +2,7 @@ import sys
 
 from PyQt6.QtWidgets import QApplication
 
-from chatbot.gui.gui import MainWindow
+from chatbot.gui.main_window import MainWindow
 
 
 def main():
