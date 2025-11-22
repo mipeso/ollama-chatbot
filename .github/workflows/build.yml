@@ -32,13 +32,32 @@ jobs:
 
       - name: Build executable
         run: |
+          EXECUTABLE_DIR="dist/ollama-chatbot-${{ runner.os }}"
+          mkdir -p "$EXECUTABLE_DIR"
           pyinstaller --onedir --name "Ollama Chatbot" --windowed chatbot/ollama_chatbot.py
+          mv dist/"Ollama Chatbot" "$EXECUTABLE_DIR"
+        shell: bash
+
+      - name: Create ZIP Archive
+        run: |
+          case ${{ runner.os }} in
+            Linux|macOS)
+              zip -r "ollama-chatbot-${{ runner.os }}.zip" "dist/ollama-chatbot-${{ runner.os }}/"
+              ;;
+            Windows)
+              Compress-Archive -Path "dist\ollama-chatbot-Windows\*" -DestinationPath "ollama-chatbot-Windows.zip"
+              ;;
+            *)
+              echo "Unsupported OS: ${{ runner.os }}"
+              exit 1
+              ;;
+          esac
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ollama-chatbot-${{ runner.os }}
-          path: dist/
+          path: ollama-chatbot-${{ runner.os }}.zip
 
   release:
     needs: build
