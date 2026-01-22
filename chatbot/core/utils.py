@@ -1,6 +1,6 @@
 from pathlib import Path
 
-log_folder = Path(__file__).parent / "logs"
+log_folder = Path(__file__).parent.parent / "logs"
 
 
 def init_log(name: str, model: str, extension: str = "log") -> None:
