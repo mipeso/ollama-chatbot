@@ -1,6 +1,6 @@
 .DS_Store
 __pycache__/
-chatbot/api_caller/logs/
+chatbot/logs/
 ollama_chatbot.spec
 
 build/
