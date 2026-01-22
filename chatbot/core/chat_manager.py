@@ -11,7 +11,7 @@ class ROLES(str, Enum):
     system = "system"
 
 
-class APICaller:
+class ChatManager:
     def __init__(self, model: str):
         super().__init__()
         self.model = model
