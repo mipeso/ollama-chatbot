@@ -17,8 +17,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from chatbot.api_caller.api_caller import ROLES, APICaller
-from chatbot.api_caller.utils import delete_log, get_logs, init_log
+from chatbot.core.chat_manager import ROLES, ChatManager
+from chatbot.core.utils import delete_log, get_logs, init_log
 
 
 class MessageType(str, Enum):
@@ -63,10 +63,10 @@ class MainWindow(QMainWindow):
         models = ollama.list()
         for model in models["models"]:
             self.model_combobox.addItem(model["model"])
-        self.api_caller = APICaller(self.model_combobox.currentText())
+        self.api_caller = ChatManager(self.model_combobox.currentText())
 
     def init_model(self) -> None:
-        self.api_caller = APICaller(self.model_combobox.currentText())
+        self.api_caller = ChatManager(self.model_combobox.currentText())
         self.chat_list.clear()
         logs = get_logs(self.model_combobox.currentText())
         if logs:
