@@ -3,12 +3,10 @@ import re
 from enum import Enum
 from pathlib import Path
 
-import nltk
 import ollama
 from PyQt6 import uic
 from PyQt6.QtWidgets import (
     QAbstractItemView,
-    QFileDialog,
     QInputDialog,
     QLabel,
     QListWidgetItem,
@@ -21,9 +19,7 @@ from PyQt6.QtWidgets import (
 
 from chatbot.core.chat_manager import ROLES, ChatManager
 from chatbot.core.embeddings_manager import EmbeddingsManager
-from chatbot.core.utils import delete_log, get_logs, init_log
-
-nltk.download("punkt_tab")
+from chatbot.core.utils import browse_files, delete_log, get_logs, init_log
 
 
 class MessageType(str, Enum):
@@ -142,22 +138,20 @@ class MainWindow(QMainWindow):
 
         question = self.text_input_field.text()
         self.add_message(question, MessageType.QUESTION)
-        file_path = (
+        log_file_path = (
             Path(__file__).parent.parent
             / "logs"
             / self.model_combobox.currentText()
             / f"{self.chat_list.currentItem().text()}.log"
         )
 
+        # RAG
         rag_context = None
-        if self.input_file_field.text():
-            # Read the file and embed its content
-            rag_data = self.read_file(self.input_file_field.text())
-            self.embeddings_manager.embed(rag_data)
-            # Retrieve the most relevant text for the question
-            retrieved_text = self.embeddings_manager.retrieve(question)
-            # Combine retrieved text and user input
-            rag_context = "\n".join(retrieved_text)
+        input_file_path = self.input_file_field.text()
+        if input_file_path:
+            rag_context = self.embeddings_manager.retrieve_relevant_text(
+                self, input_file_path, question
+            )
 
         messages = list(self.data)
 
@@ -179,7 +173,7 @@ class MainWindow(QMainWindow):
         # Save messages to log
         self.data.append({"role": ROLES.user, "content": question})
         self.data.append({"role": ROLES.system, "content": answer_cleaned})
-        self.chat_manager.save_response(answer_cleaned, question, file_path)
+        self.chat_manager.save_response(answer_cleaned, question, log_file_path)
         self.add_message(answer_cleaned, MessageType.ANSWER)
         self.input_file_field.setText("")
 
@@ -206,20 +200,4 @@ class MainWindow(QMainWindow):
         )
 
     def browse(self):
-        dialog = QFileDialog(self)
-        file_path, _ = dialog.getOpenFileName(
-            self, self.tr("Select File"), filter=self.tr("Text files (*.txt)")
-        )
-        self.input_file_field.setText(file_path)
-
-    def read_file(self, file_path: str) -> list[str]:
-        try:
-            with open(file_path, "r", encoding="utf-8") as file:
-                text = file.read()
-        except FileNotFoundError:
-            QMessageBox.critical(self, "", f"File {file_path} was not found.")
-            return []
-
-        sentences = nltk.sent_tokenize(text)
-
-        return sentences
+        browse_files(self)
