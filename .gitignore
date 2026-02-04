@@ -5,3 +5,5 @@ ollama_chatbot.spec
 
 build/
 dist/*
+
+documents/
